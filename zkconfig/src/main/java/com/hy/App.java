@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
-@MapperScan(value = "com..hy.mubatis.mapper")
+@MapperScan(value = "com.hy.mybatis.mapper")
 @EnableTransactionManagement
 public class App {
 

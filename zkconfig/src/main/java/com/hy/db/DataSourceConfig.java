@@ -18,7 +18,7 @@ public class DataSourceConfig {
     @Bean
     public DataSource dataSource() {
         EnjoyDataSource dataSource = new EnjoyDataSource();
-        dataSource.setUrl("jdbc:mysql://localhost:3306/mysqldemo");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/world");
         dataSource.setUsername("root");
         dataSource.setPassword("6126540");
         dataSource.setDefaultReadOnly(false);
