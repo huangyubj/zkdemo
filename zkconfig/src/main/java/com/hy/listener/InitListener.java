@@ -1,28 +1,33 @@
 package com.hy.listener;
 
+import com.hy.db.DataSourceConfig;
 import com.hy.db.EnjoyDataSource;
 import com.hy.util.RuntimeContext;
+import com.hy.util.ZookeeperUtil;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.data.Stat;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.sql.DataSource;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class InitListener implements ServletContextListener {
 
-    private  static final String URL = "/db/url";
-    private  static final String PASSWORD = "/db/password";
-    private  static final String USERNAME = "/db/username";
-    private  static final String DRIVER = "/db/driver";
+    public  static final String URL = "/db/url";
+    public  static final String PASSWORD = "/db/password";
+    public  static final String USERNAME = "/db/username";
+    public  static final String DRIVER = "/db/driver";
 
-    private CuratorFramework curatorFramework = CuratorFrameworkFactory.newClient("0.0.0.0:2181",
-            60000, 1000, new ExponentialBackoffRetry(1000, 100));
+    private CuratorFramework curatorFramework = ZookeeperUtil.getCuratorFramework();
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -30,6 +35,15 @@ public class InitListener implements ServletContextListener {
     }
 
     private void init() {
+        curatorFramework.start();
+        try {
+            createNode(URL, DataSourceConfig.DEFAULT_URL);
+            createNode(PASSWORD, DataSourceConfig.USER_NAME);
+            createNode(USERNAME, DataSourceConfig.PASSWORLD);
+            createNode(DRIVER, DataSourceConfig.DEFAULT_URL);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         TreeCache treeCache = new TreeCache(curatorFramework, "/db");
         ExecutorService service = Executors.newFixedThreadPool(2);
         treeCache.getListenable().addListener(new TreeCacheListener() {
@@ -62,6 +76,21 @@ public class InitListener implements ServletContextListener {
                 System.out.println("数据data："+ new String(treeCacheEvent.getData().getData()));
             }
         }, service);
+        try {
+            treeCache.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private void createNode(String path, String data){
+        try {
+            Stat stat = curatorFramework.checkExists().forPath(path);
+            if(stat == null){
+                curatorFramework.create().creatingParentsIfNeeded().forPath(path, data.getBytes());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     private void updateDatasource(String path, String data){
         EnjoyDataSource dataSource = RuntimeContext.getBean(EnjoyDataSource.class);
