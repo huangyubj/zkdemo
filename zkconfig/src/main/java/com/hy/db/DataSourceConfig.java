@@ -11,19 +11,16 @@ import javax.sql.DataSource;
 
 @Configuration
 public class DataSourceConfig {
-
-    public static final String DEFAULT_URL = "jdbc:mysql://localhost:3306/world";
-    public static final String USER_NAME = "root";
-    public static final String PASSWORLD = "6126540";
+    
 
 
 
     @Bean
     public DataSource dataSource() {
         EnjoyDataSource dataSource = new EnjoyDataSource();
-        dataSource.setUrl(DEFAULT_URL);
-        dataSource.setUsername(USER_NAME);
-        dataSource.setPassword(PASSWORLD);
+        dataSource.setUrl("jdbc:mysql://localhost:3306/mysqldemo");
+        dataSource.setUsername("root");
+        dataSource.setPassword("6126540");
         dataSource.setDefaultReadOnly(false);
 
         return  dataSource;

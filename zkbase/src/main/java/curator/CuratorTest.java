@@ -6,14 +6,16 @@ import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
 
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class CuratorTest {
 
-    private final String CONNECTION = "127.0.0.1:2181";
+    private final String CONNECTION = "0.0.0.0:2181";
     private final int TIME_OUT = 30;
     private CuratorFramework curatorFramework;
 
@@ -21,17 +23,39 @@ public class CuratorTest {
         String path = "/hydata";
         CuratorTest curatorTest = new CuratorTest();
         curatorTest.init();
-        curatorTest.createParentNode(path, "testhydata");
-        curatorTest.createParentNode(path+"/child1", "child1");
-        curatorTest.createParentNode(path+"/child2", "child2");
-        curatorTest.getData(path);
-        curatorTest.updateData(path, "12312312");
-        curatorTest.deleteData(path);
+        curatorTest.test_es();
+//        curatorTest.test_es();
+//        curatorTest.test_es();
+        curatorTest.get_es();
+
+//        curatorTest.createParentNode(path, "testhydata");
+//        curatorTest.createParentNode(path+"/child1", "child1");
+//        curatorTest.createParentNode(path+"/child2", "child2");
+//        curatorTest.getData(path);
+//        curatorTest.updateData(path, "12312312");
+//        curatorTest.deleteData(path);
+        curatorTest.close();
+    }
+
+    private void close() {
+        curatorFramework.close();
+    }
+
+    public void test_es() throws Exception {
+        curatorFramework.create().withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath("/test_es/");
+    }
+    public void get_es() throws Exception {
+        Iterator<String> iterator = curatorFramework.getChildren().forPath("/test_es").iterator();
+        while (iterator.hasNext()){
+            String str = iterator.next();
+            System.out.println("---------------------------:"+str);
+        }
+        System.out.println("---------------------------"+new String(curatorFramework.getData().forPath("/test_es")));
     }
     public void init() throws Exception {
         curatorFramework = CuratorFrameworkFactory.newClient(CONNECTION, TIME_OUT, TIME_OUT, new ExponentialBackoffRetry(1000, 10));
         curatorFramework.start();
-        /**
+        /**ZookeeperDistrbuteLock2
          * 三种watcher来做节点的监听
          * pathcache   监视一个路径下子节点的创建、删除、节点数据更新
          * NodeCache   监视一个节点的创建、更新、删除

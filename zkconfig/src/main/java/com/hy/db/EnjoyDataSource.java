@@ -5,7 +5,7 @@
 
 package com.hy.db;
 
-import com.hy.util.RuntimeContext;
+import cn.enjoy.utils.RuntimeContext;
 import org.apache.commons.dbcp.*;
 import org.apache.commons.pool.KeyedObjectPoolFactory;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
